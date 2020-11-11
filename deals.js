@@ -6,11 +6,12 @@ let updatedDeals = {
     information: [],
     quote: [],
     proposal: [],
-    invoice: []
+    invoice: [],
+    other: []
 };
 
 // todo: ========================RETRIEVE========================
-db.deals.find({ dealType: 'dealRfq' }).forEach(deal => {
+db.deals.find({}).forEach(deal => {
     let type = '';
     let obj = {};
     switch (deal.dealType) {
@@ -18,10 +19,11 @@ db.deals.find({ dealType: 'dealRfq' }).forEach(deal => {
         case 'dealRfp': obj = _rfp(deal); type = 'rfp'; break;
         case 'dealRfi': obj = _rfi(deal); type = 'rfi'; break;
         case 'dealPo': obj = _po(deal); type = 'po'; break;
-        // case 'dealInformation': obj = _information(deal); type = 'information'; break;
-        // case 'dealQuote': obj = _quote(deal); type = 'quote'; break;
-        // case 'dealProposal': obj = _proposal(deal); type = 'proposal'; break;
-        // case 'dealInvoice': obj = _invoice(deal); type = 'invoice'; break;
+        case 'dealInformation': obj = _information(deal); type = 'information'; break;
+        case 'dealQuote': obj = _quote(deal); type = 'quote'; break;
+        case 'dealProposal': obj = _proposal(deal); type = 'proposal'; break;
+        case 'dealInvoice': obj = _invoice(deal); type = 'invoice'; break;
+        default: obj = deal; type = 'other'; break;
     };
     updatedDeals[type].push(_clean(obj));
 });
@@ -31,352 +33,175 @@ _addToDB('rfq');
 _addToDB('rfp');
 _addToDB('rfi');
 _addToDB('po');
-// _addToDB(information);
-// _addToDB(quote);
-// _addToDB(proposal);
-// _addToDB(invoice);
+_addToDB('information');
+_addToDB('quote');
+_addToDB('proposal');
+_addToDB('invoice');
 
 // todo: ========================SCHEMAS========================
 function _rfq(deal) {
-    return {
-        _id: deal._id,
-        code: _isPopulated(deal.dealRfq, 'rfqNumber'),
-        image: _isPopulated(_isPopulated(deal.dealRfq, 'rfqImage'), 'content'),
-        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
-        items: _items(_isPopulated(deal.dealRfq, 'rfqItems')),
-        note: _isPopulated(deal.dealRfq, 'rfqNote'),
-        industry: _isPopulated(deal.dealRfq, 'rfqIndustry'),
-        document: _isPopulated(_isPopulated(deal.dealRfq, 'rfqDocumentation'), 'content'),
-        address: _clean({
-            short: _isPopulated(_isPopulated(deal.dealRfq, 'rfqAddress'), 'short'),
-            street: _isPopulated(_isPopulated(deal.dealRfq, 'rfqAddress'), 'street'),
-            city: _isPopulated(_isPopulated(deal.dealRfq, 'rfqAddress'), 'short'),
-            province: _isPopulated(_isPopulated(deal.dealRfq, 'rfqAddress'), 'short'),
-            country: _isPopulated(deal.dealRfq, 'rfqCountry'),
-            code: _isPopulated(_isPopulated(deal.dealRfq, 'rfqAddress'), 'postal'),
-        }),
-        meeting: _clean({
-            time: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'meetingTime'),
-            date: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'meetingDate'),
-            short: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'short'),
-            street: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'street'),
-            city: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'administrativeTwo'),
-            province: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'administrativeOne'),
-        }),
-        issueDate: _isPopulated(deal.dealRfq, 'rfqIssueDate'),
-        expiryDate: _isPopulated(deal.dealRfq, 'rfqDeadlineDate'),
-        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
-        publishDate: _isPopulated(deal, 'dealPublishDate'),
-        lead: _isPopulated(deal, 'dealLead'),
-        public: _isPopulated(deal, 'dealPublic'),
-        stage: _isPopulated(deal, 'dealStage'),
-        business: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
-            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
-            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
-            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
-            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
-        }),
-        user: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
-            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
-            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
-        })
-    };
+    let rfq = {};
+    _mergeSchemas(rfq, _buildRefDetials(deal,'rfq'));
+    rfq.image = _isPopulated(_isPopulated(deal.dealRfq, 'rfqImage'), 'content');
+    rfq.items = _items(_isPopulated(deal.dealRfq, 'rfqItems'));
+    rfq.note = _isPopulated(deal.dealRfq, 'rfqNote');
+    rfq.industry = _isPopulated(deal.dealRfq, 'rfqIndustry');
+    rfq.document = _isPopulated(_isPopulated(deal.dealRfq, 'rfqDocumentation'), 'content');
+    rfq.address = _clean({
+        short: _isPopulated(_isPopulated(deal.dealRfq, 'rfqAddress'), 'short'),
+        street: _isPopulated(_isPopulated(deal.dealRfq, 'rfqAddress'), 'street'),
+        city: _isPopulated(_isPopulated(deal.dealRfq, 'rfqAddress'), 'short'),
+        province: _isPopulated(_isPopulated(deal.dealRfq, 'rfqAddress'), 'short'),
+        country: _isPopulated(deal.dealRfq, 'rfqCountry'),
+        code: _isPopulated(_isPopulated(deal.dealRfq, 'rfqAddress'), 'postal'),
+    });
+    rfq.meeting = _clean({
+        time: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'meetingTime'),
+        date: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'meetingDate'),
+        short: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'short'),
+        street: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'street'),
+        city: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'administrativeTwo'),
+        province: _isPopulated(_isPopulated(deal.dealRfq, 'rfqBriefingMeeting'), 'administrativeOne'),
+    });
+    rfq.issueDate = _isPopulated(deal.dealRfq, 'rfqIssueDate');
+    rfq.expiryDate = _isPopulated(deal.dealRfq, 'rfqDeadlineDate');
+    _mergeSchemas(rfq, _buildDetials(deal));
+
+    return rfq;
 }
 
 function _rfp(deal) {
-    return {
-        // todo ============deal ref details============
-        _id: deal._id,
-        code: _isPopulated(deal.dealRfp, 'rfpNumber'),
-        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
+    let rfp = {};
+    _mergeSchemas(rfp, _buildRefDetials(deal,'rfp'));
+    rfp.meeting = _clean({
+        time: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingTime'),
+        date: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingDate'),
+        short: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'short'),
+        street: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'street'),
+        city: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeTwo'),
+        province: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeOne'),
+    });
+    rfp.introduction = _isPopulated(deal.dealRfp, 'rfpIntroduction');
+    rfp.industry = _isPopulated(deal.dealRfp, 'rfpIndustry');
+    rfp.questionnaire = _isPopulated(deal.dealRfp, 'rfpQuestionnaire');
+    rfp.document = _isPopulated(_isPopulated(deal.dealRfp, 'rfpDocumentation'), 'content');
+    rfp.address = _clean({
+        country: _isPopulated(deal.dealRfp, 'rfpCountry'),
+    });
+    rfp.issueDate = _isPopulated(deal.dealRfp, 'rfpIssueDate');
+    rfp.expiryDate = _isPopulated(deal.dealRfp, 'rfpDeadlineDate');
+    _mergeSchemas(rfp, _buildDetials(deal));
 
-        // todo ============innerdeal details============
-        meeting: _clean({
-            time: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingTime'),
-            date: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingDate'),
-            short: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'short'),
-            street: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'street'),
-            city: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeTwo'),
-            province: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeOne'),
-        }),
-        introduction: _isPopulated(deal.dealRfp, 'rfpIntroduction'),
-        industry: _isPopulated(deal.dealRfp, 'rfpIndustry'),
-        document: _isPopulated(_isPopulated(deal.dealRfp, 'rfpDocumentation'), 'content'),
-        address: _clean({
-            country: _isPopulated(deal.dealRfp, 'rfpCountry'),
-        }),
-        issueDate: _isPopulated(deal.dealRfp, 'rfpIssueDate'),
-        expiryDate: _isPopulated(deal.dealRfp, 'rfpDeadlineDate'),
-
-        // todo ============deal details============
-        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
-        publishDate: _isPopulated(deal, 'dealPublishDate'),
-        lead: _isPopulated(deal, 'dealLead'),
-        public: _isPopulated(deal, 'dealPublic'),
-        stage: _isPopulated(deal, 'dealStage'),
-        business: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
-            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
-            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
-            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
-            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
-        }),
-        user: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
-            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
-            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
-        })
-    };
+    return rfp;
 }
 
 function _rfi(deal) {
-    return {
-        _id: deal._id,
-        code: _isPopulated(deal.dealRfi, 'rfiNumber'),
-        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
-        desc: _isPopulated(deal.dealRfi, 'rfiDescription'),
-        industry: _isPopulated(deal.dealRfi, 'rfiIndustry'),
-        document: _isPopulated(_isPopulated(deal.dealRfi, 'rfiDocumentation'), 'content'),
-        address: _clean({
-            country: _isPopulated(deal.dealRfi, 'rfiCountry'),
-        }),
-        issueDate: _isPopulated(deal.dealRfi, 'rfiIssueDate'),
-        expiryDate: _isPopulated(deal.dealRfi, 'rfiDeadlineDate'),
-        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
-        publishDate: _isPopulated(deal, 'dealPublishDate'),
-        lead: _isPopulated(deal, 'dealLead'),
-        public: _isPopulated(deal, 'dealPublic'),
-        stage: _isPopulated(deal, 'dealStage'),
-        business: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
-            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
-            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
-            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
-            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
-        }),
-        user: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
-            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
-            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
-        })
-    };
+    let rfi = {};
+    _mergeSchemas(rfi, _buildRefDetials(deal,'rfi'));
+    rfi.desc = _isPopulated(deal.dealRfi, 'rfiDescription');
+    rfi.industry = _isPopulated(deal.dealRfi, 'rfiIndustry');
+    rfi.document = _isPopulated(_isPopulated(deal.dealRfi, 'rfiDocumentation'), 'content');
+    rfi.address = _clean({
+        country: _isPopulated(deal.dealRfi, 'rfiCountry'),
+    });
+    rfi.issueDate = _isPopulated(deal.dealRfi, 'rfiIssueDate');
+    rfi.expiryDate = _isPopulated(deal.dealRfi, 'rfiDeadlineDate');
+    _mergeSchemas(rfi, _buildDetials(deal));
+
+    return rfi;
 }
 
 function _po(deal) {
-    return {
-        _id: deal._id,
-        code: _isPopulated(deal.dealPo, 'poNumber'),
-        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
-        items: _items(_isPopulated(deal.dealPo, 'poItems')),
-        currency: _isPopulated(deal.dealPo, 'poCurrency'),
-        discount: _isPopulated(deal.dealPo, 'poDiscount'),
-        subTotal: _isPopulated(deal.dealPo, 'poSubTotal'),
-        total: _isPopulated(deal.dealPo, 'poGrandTotal'),
-        terms: _isPopulated(deal.dealPo, 'poTerms'),
-        document: _isPopulated(_isPopulated(deal.dealPo, 'poDocumentation'), 'content'),
-        issueDate: _isPopulated(deal.dealPo, 'poIssueDate'),
-        expiryDate: _isPopulated(deal.dealPo, 'poDeadlineDate'),
-        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
-        publishDate: _isPopulated(deal, 'dealPublishDate'),
-        lead: _isPopulated(deal, 'dealLead'),
-        public: _isPopulated(deal, 'dealPublic'),
-        stage: _isPopulated(deal, 'dealStage'),
-        business: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
-            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
-            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
-            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
-            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
-        }),
-        user: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
-            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
-            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
-        })
-    };
+    let po = {};
+    _mergeSchemas(po, _buildRefDetials(deal,'po'));
+    po.items = _items(_isPopulated(deal.dealPo, 'poItems'));
+    po.currency = _isPopulated(deal.dealPo, 'poCurrency');
+    po.discount = _isPopulated(deal.dealPo, 'poDiscount');
+    po.subTotal = _isPopulated(deal.dealPo, 'poSubTotal');
+    po.total = _isPopulated(deal.dealPo, 'poGrandTotal');
+    po.terms = _isPopulated(deal.dealPo, 'poTerms');
+    po.document = _isPopulated(_isPopulated(deal.dealPo, 'poDocumentation'), 'content');
+    po.issueDate = _isPopulated(deal.dealPo, 'poIssueDate');
+    po.expiryDate = _isPopulated(deal.dealPo, 'poDeadlineDate');
+    _mergeSchemas(po, _buildDetials(deal));
+
+    return po;
 }
 
 function _information(deal) {
-    return {
-        // todo ============deal ref details============
-        _id: deal._id,
-        code: _isPopulated(deal.dealRfp, 'informationNumber'),
-        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
+    let information = {};
+    _mergeSchemas(information, _buildRefDetials(deal,'information'));
+    information.items = _infoItems(_isPopulated(deal.dealInformation, 'informationItems'));
+    information.note = _isPopulated(deal.dealInformation, 'informationNote');
+    information.industry = _isPopulated(deal.dealInformation, 'informationIndustry');
+    information.address = _clean({
+        country: _isPopulated(deal.dealInformation, 'information,Country'),
+    });
+    information.issueDate = _isPopulated(deal.dealInformation, 'informationIssueDate');
+    _mergeSchemas(information, _buildDetials(deal));
 
-        // todo ============innerdeal details============
-        items : _infoItems(_isPopulated(deal.dealInformation, 'informationItems')),
-        note: _isPopulated(deal.dealInformation, 'informationNote'),
-        industry: _isPopulated(deal.dealInformation, 'informationIndustry'),
-        address: _clean({
-            country: _isPopulated(deal.dealInformation, 'information,Country'),
-        }),
-        issueDate: _isPopulated(deal.dealInformation, 'informationIssueDate'),
-
-        // todo ============deal details============
-        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
-        publishDate: _isPopulated(deal, 'dealPublishDate'),
-        lead: _isPopulated(deal, 'dealLead'),
-        public: _isPopulated(deal, 'dealPublic'),
-        stage: _isPopulated(deal, 'dealStage'),
-        business: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
-            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
-            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
-            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
-            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
-        }),
-        user: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
-            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
-            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
-        })
-    };
+    return information;
 }
 
 function _quote(deal) {
-    return {
-        // todo ============deal ref details============
-        _id: deal._id,
-        code: _isPopulated(deal.dealQuote, 'quoteNumber'),
-        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
+    let quote = {};
+    _mergeSchemas(quote, _buildRefDetials(deal,'quote'));
+    quote.currency = _isPopulated(deal.dealQuote, 'quoteCurrency');
+    quote.terms = _isPopulated(deal.dealQuote, 'quoteTerms');
+    quote.discount = _isPopulated(deal.dealQuote, 'quoteDiscount');
+    quote.subTotal = _isPopulated(deal.dealQuote, 'quoteSubTotal');
+    quote.total = _isPopulated(deal.dealQuote, 'quoteGrandTotal');
+    quote.items = _items(_isPopulated(deal.dealQuote, 'quoteItems'));
+    quote.taxItems =  _taxItems(_isPopulated(deal.dealQuote, 'quoteTaxItems'));
+    quote.document = _isPopulated(_isPopulated(deal.dealQuote, 'rfpDocumentation'), 'content');
+    quote.address = _clean({
+        country: _isPopulated(deal.dealQuote, 'rfpCountry'),
+    });
+    quote.issueDate = _isPopulated(deal.dealQuote, 'rfpIssueDate');
+    quote.expiryDate = _isPopulated(deal.dealQuote, 'rfpDeadlineDate');
+    _mergeSchemas(quote, _buildDetials(deal));
 
-        // todo ============innerdeal details============
-        meeting: _clean({
-            time: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingTime'),
-            date: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingDate'),
-            short: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'short'),
-            street: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'street'),
-            city: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeTwo'),
-            province: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeOne'),
-        }),
-        introduction: _isPopulated(deal.dealRfp, 'rfpIntroduction'),
-        industry: _isPopulated(deal.dealRfp, 'rfpIndustry'),
-        document: _isPopulated(_isPopulated(deal.dealRfp, 'rfpDocumentation'), 'content'),
-        address: _clean({
-            country: _isPopulated(deal.dealRfp, 'rfpCountry'),
-        }),
-        issueDate: _isPopulated(deal.dealRfp, 'rfpIssueDate'),
-        expiryDate: _isPopulated(deal.dealRfp, 'rfpDeadlineDate'),
-
-        // todo ============deal details============
-        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
-        publishDate: _isPopulated(deal, 'dealPublishDate'),
-        lead: _isPopulated(deal, 'dealLead'),
-        public: _isPopulated(deal, 'dealPublic'),
-        stage: _isPopulated(deal, 'dealStage'),
-        business: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
-            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
-            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
-            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
-            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
-        }),
-        user: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
-            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
-            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
-        })
-    };
+    return quote;
 }
 
 function _proposal(deal) {
-    return {
-        // todo ============deal ref details============
-        _id: deal._id,
-        code: _isPopulated(deal.dealRfp, 'rfpNumber'),
-        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
+    let proposal = {};
+    _mergeSchemas(proposal, _buildRefDetials(deal,'proposal'));
+    proposal.introduction = _isPopulated(deal.dealProposal, 'proposalIntroduction');
+    proposal.industry = _isPopulated(deal.dealProposal, 'proposalIndustry');
+    proposal.document = _isPopulated(_isPopulated(deal.dealProposal, 'proposalDocumentation'), 'content');
+    proposal.address = _clean({
+        country: _isPopulated(deal.dealProposal, 'proposalCountry'),
+    });
+    _mergeSchemas(proposal, _buildDetials(deal));
 
-        // todo ============innerdeal details============
-        meeting: _clean({
-            time: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingTime'),
-            date: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingDate'),
-            short: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'short'),
-            street: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'street'),
-            city: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeTwo'),
-            province: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeOne'),
-        }),
-        introduction: _isPopulated(deal.dealRfp, 'rfpIntroduction'),
-        industry: _isPopulated(deal.dealRfp, 'rfpIndustry'),
-        document: _isPopulated(_isPopulated(deal.dealRfp, 'rfpDocumentation'), 'content'),
-        address: _clean({
-            country: _isPopulated(deal.dealRfp, 'rfpCountry'),
-        }),
-        issueDate: _isPopulated(deal.dealRfp, 'rfpIssueDate'),
-        expiryDate: _isPopulated(deal.dealRfp, 'rfpDeadlineDate'),
-
-        // todo ============deal details============
-        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
-        publishDate: _isPopulated(deal, 'dealPublishDate'),
-        lead: _isPopulated(deal, 'dealLead'),
-        public: _isPopulated(deal, 'dealPublic'),
-        stage: _isPopulated(deal, 'dealStage'),
-        business: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
-            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
-            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
-            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
-            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
-        }),
-        user: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
-            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
-            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
-        })
-    };
+    return proposal;
 }
 
 function _invoice(deal) {
-    return {
-        // todo ============deal ref details============
-        _id: deal._id,
-        code: _isPopulated(deal.dealRfp, 'rfpNumber'),
-        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
-
-        // todo ============innerdeal details============
-        meeting: _clean({
-            time: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingTime'),
-            date: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingDate'),
-            short: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'short'),
-            street: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'street'),
-            city: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeTwo'),
-            province: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeOne'),
-        }),
-        introduction: _isPopulated(deal.dealRfp, 'rfpIntroduction'),
-        industry: _isPopulated(deal.dealRfp, 'rfpIndustry'),
-        document: _isPopulated(_isPopulated(deal.dealRfp, 'rfpDocumentation'), 'content'),
-        address: _clean({
-            country: _isPopulated(deal.dealRfp, 'rfpCountry'),
-        }),
-        issueDate: _isPopulated(deal.dealRfp, 'rfpIssueDate'),
-        expiryDate: _isPopulated(deal.dealRfp, 'rfpDeadlineDate'),
-
-        // todo ============deal details============
-        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
-        publishDate: _isPopulated(deal, 'dealPublishDate'),
-        lead: _isPopulated(deal, 'dealLead'),
-        public: _isPopulated(deal, 'dealPublic'),
-        stage: _isPopulated(deal, 'dealStage'),
-        business: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
-            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
-            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
-            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
-            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
-        }),
-        user: _clean({
-            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
-            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
-            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
-        })
-    };
+    let invoice = {};
+    _mergeSchemas(invoice, _buildRefDetials(deal,'invoice'));
+    invoice.currency = _isPopulated(deal.dealInvoice, 'invoiceCurrency');
+    invoice.terms = _isPopulated(deal.dealInvoice, 'invoiceTerms');
+    invoice.subTotal = _isPopulated(deal.dealInvoice, 'invoiceSubTotal');
+    invoice.total = _isPopulated(deal.dealInvoice, 'invoiceGrandTotal');
+    invoice.items = _items(_isPopulated(deal.dealInvoice, 'invoiceItems'));
+    invoice.taxItems =  _taxItems(_isPopulated(deal.dealInvoice, 'invoiceTaxItems'));
+    invoice.document = _isPopulated(_isPopulated(deal.dealInvoice, 'invoiceDocumentation'), 'content');
+    invoice.issueDate = _isPopulated(deal.dealInvoice, 'invoiceIssueDate');
+    invoice.expiryDate = _isPopulated(deal.dealInvoice, 'invoiceDeadlineDate');
+    _mergeSchemas(invoice, _buildDetials(deal));
+    
+    return invoice;
 }
 
 // todo: ========================TOOLS========================
 function _addToDB(col) {
-    if (updatedDeals[col].length > 0)
+    if (updatedDeals[col].length > 0){
+        db.getSiblingDB('tradebrics_prod').createCollection(col);
         db.getSiblingDB('tradebrics_prod')[col].insertMany(updatedDeals[col]);
+    }
+        
 }
 
 function _items(items) {
@@ -439,9 +264,9 @@ function _clean(obj) {
         }
     }
 
-    for (let prop in temp) {
+    if(Object.keys(temp).length > 0)
         return temp;
-    }
+    
     return null;
 }
 
@@ -461,4 +286,45 @@ function _isPopulated(obj, key) {
         return obj[key];
     }
     return null;
+}
+
+// todo: ========================SCHEMA TOOLS========================
+
+function _mergeSchemas(objFinal, objMerge) {
+    for (const key in objMerge) {
+        objFinal[key] = objMerge[key];
+    }
+    return objFinal;
+}
+
+function _buildRefDetials(deal,code){
+    const type = 'deal' + code.charAt(0).toUpperCase() + code.slice(1);
+    code = code + 'Number';
+    return {
+        _id: deal._id,
+        code: _isPopulated(deal[type], code),
+        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients'))
+    }
+}
+
+function _buildDetials(deal){
+    return {
+        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
+        publishDate: _isPopulated(deal, 'dealPublishDate'),
+        lead: _isPopulated(deal, 'dealLead'),
+        public: _isPopulated(deal, 'dealPublic'),
+        stage: _isPopulated(deal, 'dealStage'),
+        business: _clean({
+            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
+            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
+            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
+            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
+            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
+        }),
+        user: _clean({
+            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
+            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
+            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
+        })
+    }
 }

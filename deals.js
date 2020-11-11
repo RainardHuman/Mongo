@@ -199,19 +199,178 @@ function _po(deal) {
 }
 
 function _information(deal) {
-    // return {}
+    return {
+        // todo ============deal ref details============
+        _id: deal._id,
+        code: _isPopulated(deal.dealRfp, 'informationNumber'),
+        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
+
+        // todo ============innerdeal details============
+        items : _infoItems(_isPopulated(deal.dealInformation, 'informationItems')),
+        note: _isPopulated(deal.dealInformation, 'informationNote'),
+        industry: _isPopulated(deal.dealInformation, 'informationIndustry'),
+        address: _clean({
+            country: _isPopulated(deal.dealInformation, 'information,Country'),
+        }),
+        issueDate: _isPopulated(deal.dealInformation, 'informationIssueDate'),
+
+        // todo ============deal details============
+        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
+        publishDate: _isPopulated(deal, 'dealPublishDate'),
+        lead: _isPopulated(deal, 'dealLead'),
+        public: _isPopulated(deal, 'dealPublic'),
+        stage: _isPopulated(deal, 'dealStage'),
+        business: _clean({
+            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
+            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
+            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
+            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
+            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
+        }),
+        user: _clean({
+            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
+            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
+            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
+        })
+    };
 }
 
 function _quote(deal) {
-    // return {}
+    return {
+        // todo ============deal ref details============
+        _id: deal._id,
+        code: _isPopulated(deal.dealQuote, 'quoteNumber'),
+        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
+
+        // todo ============innerdeal details============
+        meeting: _clean({
+            time: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingTime'),
+            date: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingDate'),
+            short: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'short'),
+            street: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'street'),
+            city: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeTwo'),
+            province: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeOne'),
+        }),
+        introduction: _isPopulated(deal.dealRfp, 'rfpIntroduction'),
+        industry: _isPopulated(deal.dealRfp, 'rfpIndustry'),
+        document: _isPopulated(_isPopulated(deal.dealRfp, 'rfpDocumentation'), 'content'),
+        address: _clean({
+            country: _isPopulated(deal.dealRfp, 'rfpCountry'),
+        }),
+        issueDate: _isPopulated(deal.dealRfp, 'rfpIssueDate'),
+        expiryDate: _isPopulated(deal.dealRfp, 'rfpDeadlineDate'),
+
+        // todo ============deal details============
+        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
+        publishDate: _isPopulated(deal, 'dealPublishDate'),
+        lead: _isPopulated(deal, 'dealLead'),
+        public: _isPopulated(deal, 'dealPublic'),
+        stage: _isPopulated(deal, 'dealStage'),
+        business: _clean({
+            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
+            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
+            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
+            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
+            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
+        }),
+        user: _clean({
+            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
+            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
+            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
+        })
+    };
 }
 
 function _proposal(deal) {
-    // return {}
+    return {
+        // todo ============deal ref details============
+        _id: deal._id,
+        code: _isPopulated(deal.dealRfp, 'rfpNumber'),
+        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
+
+        // todo ============innerdeal details============
+        meeting: _clean({
+            time: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingTime'),
+            date: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingDate'),
+            short: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'short'),
+            street: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'street'),
+            city: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeTwo'),
+            province: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeOne'),
+        }),
+        introduction: _isPopulated(deal.dealRfp, 'rfpIntroduction'),
+        industry: _isPopulated(deal.dealRfp, 'rfpIndustry'),
+        document: _isPopulated(_isPopulated(deal.dealRfp, 'rfpDocumentation'), 'content'),
+        address: _clean({
+            country: _isPopulated(deal.dealRfp, 'rfpCountry'),
+        }),
+        issueDate: _isPopulated(deal.dealRfp, 'rfpIssueDate'),
+        expiryDate: _isPopulated(deal.dealRfp, 'rfpDeadlineDate'),
+
+        // todo ============deal details============
+        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
+        publishDate: _isPopulated(deal, 'dealPublishDate'),
+        lead: _isPopulated(deal, 'dealLead'),
+        public: _isPopulated(deal, 'dealPublic'),
+        stage: _isPopulated(deal, 'dealStage'),
+        business: _clean({
+            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
+            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
+            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
+            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
+            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
+        }),
+        user: _clean({
+            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
+            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
+            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
+        })
+    };
 }
 
 function _invoice(deal) {
-    // return {}
+    return {
+        // todo ============deal ref details============
+        _id: deal._id,
+        code: _isPopulated(deal.dealRfp, 'rfpNumber'),
+        recipients: _cleanArray(_isPopulated(deal, 'dealRecipients')),
+
+        // todo ============innerdeal details============
+        meeting: _clean({
+            time: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingTime'),
+            date: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'meetingDate'),
+            short: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'short'),
+            street: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'street'),
+            city: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeTwo'),
+            province: _isPopulated(_isPopulated(deal.dealRfp, 'rfpBriefingMeeting'), 'administrativeOne'),
+        }),
+        introduction: _isPopulated(deal.dealRfp, 'rfpIntroduction'),
+        industry: _isPopulated(deal.dealRfp, 'rfpIndustry'),
+        document: _isPopulated(_isPopulated(deal.dealRfp, 'rfpDocumentation'), 'content'),
+        address: _clean({
+            country: _isPopulated(deal.dealRfp, 'rfpCountry'),
+        }),
+        issueDate: _isPopulated(deal.dealRfp, 'rfpIssueDate'),
+        expiryDate: _isPopulated(deal.dealRfp, 'rfpDeadlineDate'),
+
+        // todo ============deal details============
+        updatedDate: _isPopulated(deal, 'dealLastUpdated'),
+        publishDate: _isPopulated(deal, 'dealPublishDate'),
+        lead: _isPopulated(deal, 'dealLead'),
+        public: _isPopulated(deal, 'dealPublic'),
+        stage: _isPopulated(deal, 'dealStage'),
+        business: _clean({
+            _id: _isPopulated(_isPopulated(deal, 'dealBusiness'), '_id'),
+            image: _isPopulated(_isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessImage'), 'content'),
+            legalName: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessLegalName'),
+            regNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessRegistrationNumber'),
+            vatNumber: _isPopulated(_isPopulated(deal, 'dealBusiness'), 'businessVatNumber'),
+        }),
+        user: _clean({
+            _id: _isPopulated(_isPopulated(deal, 'dealUser'), '_id'),
+            display: _isPopulated(_isPopulated(deal, 'dealUser'), 'userFirstName') + ' ' + _isPopulated(_isPopulated(deal, 'dealUser'), 'userLastName'),
+            email: _isPopulated(_isPopulated(deal, 'dealUser'), 'userEmail'),
+        })
+    };
 }
 
 // todo: ========================TOOLS========================
